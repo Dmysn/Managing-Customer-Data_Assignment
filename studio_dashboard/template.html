@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio North Replay</title>
+<style>
+:root{
+  color-scheme:light;
+  --surface-0:#f4f3f0; --surface-1:#fcfcfb; --surface-2:#f0efec; --border:#dcdad5;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7a7873;
+  --grid:#e7e5e0; --axis:#b9b7b1;
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a; --series-4:#eda100;
+  --forecast:#86b6ef; --forecast-ink:#256abf;
+  --seq-0:#cde2fb; --seq-1:#104281;
+  --neg:#d03b3b; --pos:#0ca30c; --mid:#f0efec;
+  --good:#0ca30c; --warning:#fab219; --critical:#d03b3b;
+  --accent:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme:dark;
+    --surface-0:#111110; --surface-1:#1a1a19; --surface-2:#262624; --border:#3a3a37;
+    --text-primary:#f0efec; --text-secondary:#c3c2b7; --text-muted:#929089;
+    --grid:#2c2c2a; --axis:#55544f;
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500;
+    --forecast:#5598e7; --forecast-ink:#86b6ef;
+    --seq-0:#184f95; --seq-1:#cde2fb;
+    --mid:#383835; --accent:#3987e5;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --surface-0:#111110; --surface-1:#1a1a19; --surface-2:#262624; --border:#3a3a37;
+  --text-primary:#f0efec; --text-secondary:#c3c2b7; --text-muted:#929089;
+  --grid:#2c2c2a; --axis:#55544f;
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500;
+  --forecast:#5598e7; --forecast-ink:#86b6ef;
+  --seq-0:#184f95; --seq-1:#cde2fb;
+  --mid:#383835; --accent:#3987e5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-0);color:var(--text-primary);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 16px 48px}
+.wrap{max-width:1280px;margin:0 auto}
+header.top{position:sticky;top:0;z-index:5;background:var(--surface-0);padding:14px 0 10px;border-bottom:1px solid var(--border)}
+.titlerow{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;justify-content:space-between}
+h1{font-size:20px;margin:0}
+.sub{color:var(--text-secondary);font-size:13px}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px}
+.asof{font-size:26px;font-weight:700;min-width:12ch;font-variant-numeric:tabular-nums}
+.asof small{display:block;font-size:12px;font-weight:400;color:var(--text-secondary)}
+button{font:inherit;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);
+  border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{flex:1 1 260px;accent-color:var(--accent)}
+select{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary)}
+.status{margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--surface-1);border:1px solid var(--border);font-size:13px}
+.status b{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
+.card{grid-column:span 12;background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:0}
+.c6{grid-column:span 6}.c4{grid-column:span 4}.c8{grid-column:span 8}
+@media (max-width:900px){.c6,.c4,.c8{grid-column:span 12}}
+.card h2{font-size:15px;margin:0 0 2px}
+.card .desc{color:var(--text-secondary);font-size:12.5px;margin:0 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+.kpi .label{font-size:12px;color:var(--text-secondary)}
+.kpi .value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:12px;color:var(--text-muted)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--text-secondary);margin:2px 0 6px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.sw.line{height:3px;border-radius:2px;vertical-align:3px}
+.scroll{overflow-x:auto}
+svg{display:block;max-width:100%;height:auto}
+svg text{fill:var(--text-secondary);font-size:11px}
+.axis line,.axis path{stroke:var(--axis)}
+.gridline{stroke:var(--grid)}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:5px 8px;border-bottom:1px solid var(--grid);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--text-secondary);font-weight:600;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--border)}
+.badge .dot{width:8px;height:8px;border-radius:50%}
+.note{font-size:12px;color:var(--text-muted);margin-top:6px}
+.empty{color:var(--text-muted);font-style:italic;padding:18px 0}
+#tip{position:fixed;pointer-events:none;z-index:20;background:var(--surface-1);color:var(--text-primary);
+  border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.15);
+  max-width:280px;display:none}
+#tip b{font-weight:600}
+.timeline{display:grid;grid-template-columns:200px repeat(24,1fr);gap:2px;align-items:center;font-size:12px}
+.timeline .cell{height:20px;border-radius:3px;background:var(--surface-2)}
+.timeline .cell.yes{background:var(--series-1)}
+.timeline .cell.cur{outline:2px solid var(--text-primary);outline-offset:1px}
+.timeline .lab{color:var(--text-secondary);padding-right:6px}
+.answer{background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-top:10px}
+details summary{cursor:pointer;color:var(--text-secondary)}
+footer{color:var(--text-muted);font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="titlerow">
+    <h1>Studio North · Month-by-month replay</h1>
+    <div class="sub">Are we moving in the right direction as a company? Each view uses only information available by the as-of month's end.</div>
+  </div>
+  <div class="controls">
+    <div class="asof" id="asof">—<small>as-of month end</small></div>
+    <button id="prev" aria-label="Previous month">◀ Prev</button>
+    <input type="range" id="slider" min="0" max="23" step="1" value="23" aria-label="As-of month">
+    <button id="next" aria-label="Next month">Next ▶</button>
+    <button id="play" aria-label="Play">▶ Play</button>
+  </div>
+  <div class="status" id="status"></div>
+</header>
+
+<div class="kpis" id="kpis" style="margin-top:14px"></div>
+
+<div class="grid">
+  <section class="card c6">
+    <h2>Contractual retention triangle</h2>
+    <p class="desc">% of each joining cohort's original customers still subscribed, by age (0 = first paid month). Observed only; cohorts not yet joined are hidden.</p>
+    <div class="scroll" id="triangle"></div>
+  </section>
+  <section class="card c6">
+    <h2>Company revenue, contribution and acquisition spend</h2>
+    <p class="desc">Monthly totals across all active cohorts (observed). Contribution deducts discounts, refunds and variable costs; fixed costs are outside the data.</p>
+    <div class="legend" id="companyLegend"></div>
+    <div id="company"></div>
+  </section>
+
+  <section class="card c8">
+    <h2>12-receipt contribution LTV vs historical average CAC, per acquired customer</h2>
+    <p class="desc">Discounted at 1% a month. Solid = value already observed by the as-of month; hatched = model forecast refit with as-of data only. The tick marks CAC.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--series-1)"></span>Observed contribution value</span>
+      <span><span class="sw" style="background:repeating-linear-gradient(45deg,var(--forecast) 0 3px,transparent 3px 6px);border:1px solid var(--forecast-ink)"></span>Forecast remainder</span>
+      <span><span class="sw line" style="background:var(--text-primary)"></span>Historical average CAC</span>
+    </div>
+    <div class="scroll" id="ltv"></div>
+  </section>
+  <section class="card c4">
+    <h2>Cash payback month</h2>
+    <p class="desc">Monthly payment at which cumulative (undiscounted) contribution first covers CAC.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--series-1);border-radius:50%"></span>Observed</span>
+      <span><span class="sw" style="border:2px solid var(--forecast-ink);border-radius:50%"></span>Forecast</span>
+      <span><span class="sw" style="background:var(--surface-2);border:1px dashed var(--axis)"></span>Not yet known</span>
+    </div>
+    <div class="scroll" id="payback"></div>
+  </section>
+
+  <section class="card c6">
+    <h2>Cohort explorer</h2>
+    <p class="desc">Cash after acquisition per customer and retention by age for one cohort, as known at the as-of month.
+      Cohort: <select id="cohortSel" aria-label="Cohort"></select></p>
+    <div class="legend">
+      <span><span class="sw line" style="background:var(--series-1)"></span>Observed</span>
+      <span><span class="sw line" style="background:repeating-linear-gradient(90deg,var(--forecast-ink) 0 4px,transparent 4px 7px)"></span>Forecast</span>
+      <span><span class="sw" style="background:var(--forecast);opacity:.35"></span>90% band (parameter uncertainty)</span>
+    </div>
+    <div id="explorer" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+  </section>
+  <section class="card c6">
+    <h2>Who joined: cohort mix by channel × stated need</h2>
+    <p class="desc">Share of each cohort's acquired customers (observed at acquisition).</p>
+    <div class="legend" id="mixLegend"></div>
+    <div class="scroll" id="mix"></div>
+  </section>
+
+  <section class="card c6">
+    <h2>Acquisition decision: value vs incremental CAC</h2>
+    <p class="desc">Latest completed monthly holdout per cell (iCAC) paired with as-of contribution value before CAC of the latest cohort with six observed receipts. Assumes additional customers are worth that cohort's average.</p>
+    <div id="decision"></div>
+  </section>
+  <section class="card c6">
+    <h2>Same-age check: are newer cohorts better?</h2>
+    <p class="desc">Observed at age 5 (six receipts): latest three eligible cohorts vs Jan–Mar 2024, customer-weighted.</p>
+    <div id="matched"></div>
+  </section>
+
+  <section class="card">
+    <h2>When did the evidence first support the report's recommendation?</h2>
+    <p class="desc">Each row is a fixed rule evaluated independently at every as-of month (filled = rule held). The outlined cell is the current month.</p>
+    <div class="scroll"><div class="timeline" id="timeline" style="min-width:760px"></div></div>
+    <div class="answer" id="answer"></div>
+  </section>
+
+  <section class="card">
+    <h2>Reconciliation with the original report (as of December 2025)</h2>
+    <div id="recon"></div>
+  </section>
+</div>
+<footer id="footer"></footer>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const S = DATA.snapshots, N = S.length;
+const MONTHS = S.map(s => s.as_of);
+const COHORTS = MONTHS.slice();
+const SEGMENTS = [["search","save_time","Search · save time"],["search","build_skill","Search · build skill"],
+                  ["partner","save_time","Partner · save time"],["partner","build_skill","Partner · build skill"]];
+const SEGVAR = ["--series-1","--series-2","--series-3","--series-4"];
+const NS = "http://www.w3.org/2000/svg";
+let idx = N - 1, timer = null, chosenCohort = null;
+
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const mlabel = m => new Date(m + "T00:00:00Z").toLocaleDateString("en-US",{month:"short",year:"numeric",timeZone:"UTC"});
+const mshort = m => new Date(m + "T00:00:00Z").toLocaleDateString("en-US",{month:"short",timeZone:"UTC"}) + " " + m.slice(2,4);
+const usd = (v,d=0) => v==null||isNaN(v) ? "—" : (v<0?"−":"") + "$" + Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const usdk = v => v==null ? "—" : (Math.abs(v)>=1e6 ? usd(v/1e6,2)+"M" : Math.abs(v)>=1e3 ? usd(v/1e3,1)+"k" : usd(v));
+const pct = (v,d=1) => v==null||isNaN(v) ? "—" : (v*100).toFixed(d) + "%";
+const segName = (c,n) => (SEGMENTS.find(s=>s[0]===c&&s[1]===n)||[,,c+" · "+n])[2];
+
+function el(tag, attrs={}, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function svg(w,h){ return el("svg",{viewBox:`0 0 ${w} ${h}`,width:w,height:h,role:"img"}); }
+function text(p,x,y,s,a={}){ const t=el("text",{x,y,...a},p); t.textContent=s; return t; }
+const tip = document.getElementById("tip");
+function hover(node, html){
+  node.addEventListener("mousemove", e=>{ tip.innerHTML=html; tip.style.display="block";
+    const r=tip.getBoundingClientRect(); let x=e.clientX+14, y=e.clientY+14;
+    if(x+r.width>innerWidth-8) x=e.clientX-r.width-14; if(y+r.height>innerHeight-8) y=e.clientY-r.height-14;
+    tip.style.left=x+"px"; tip.style.top=y+"px"; });
+  node.addEventListener("mouseleave", ()=>tip.style.display="none");
+}
+function mix(a,b,t){ const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)); const A=p(a),B=p(b);
+  return "#"+A.map((x,i)=>Math.round(x+(B[i]-x)*t).toString(16).padStart(2,"0")).join(""); }
+function lum(h){ const [r,g,b]=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(c=>c<=.03928?c/12.92:((c+.055)/1.055)**2.4); return .2126*r+.7152*g+.0722*b; }
+function hatch(s, id){ const d=el("defs",{},s); const p=el("pattern",{id,width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},d);
+  el("rect",{width:6,height:6,fill:css("--forecast"),opacity:.35},p); el("line",{x1:0,y1:0,x2:0,y2:6,stroke:css("--forecast-ink"),"stroke-width":2},p); }
+
+// ------------------------------------------------------------------ helpers on data
+function obsDiscounted(snap, cohort){
+  const rows = snap.observed.triangle.filter(r=>r.cohort===cohort && r.age<12);
+  if(!rows.length) return null;
+  const n = rows[0].n_acquired; return rows.reduce((a,r)=>a + r.contribution/Math.pow(1.01,r.age+1),0)/n;
+}
+function fcCohort(snap, cohort){ const f=snap.forecast; return f&&f.status==="fitted" ? f.cohorts.find(c=>c.cohort_month===cohort) : null; }
+let LTVMAX = 0;
+S.forEach(s=>{ (s.observed.cohorts||[]).forEach(c=>LTVMAX=Math.max(LTVMAX,c.cac));
+  const f=s.forecast; if(f&&f.status==="fitted") f.cohorts.forEach(c=>LTVMAX=Math.max(LTVMAX,c.ltv_before_cac_mean||0)); });
+LTVMAX = Math.ceil(LTVMAX/50)*50;
+
+// ------------------------------------------------------------------ status + KPIs
+function renderStatus(s){
+  const f=s.forecast, st=document.getElementById("status");
+  let h = `<b>Observed data:</b> records dated through ${mlabel(s.as_of)} · ${s.observed.triangle.length ? new Set(s.observed.triangle.map(r=>r.cohort)).size : 0} cohorts joined · ${s.observed.tests.length} completed holdout tests. `;
+  if(!f) h += `<b>Forecast:</b> not computed.`;
+  else if(f.status==="fitted"){ const d=f.diagnostics;
+    h += `<b>Forecast:</b> report model refit on ${f.training_rows} cohort-cell-months through ${mlabel(s.as_of)} (seed ${f.seed}); R-hat ${d.max_r_hat.toFixed(4)}, min ESS ${Math.round(d.min_ess)}, ${d.divergences} divergences — passes the report's release checks.`; }
+  else h += `<b>Forecast left blank:</b> ${f.reason}`;
+  st.innerHTML = h;
+}
+function renderKPIs(s){
+  const prev = idx>0 ? S[idx-1] : null;
+  const cm = s.observed.company.at(-1), pm = prev ? prev.observed.company.at(-1) : null;
+  const c = s.observed.cohorts.at(-1);
+  const obsPaid = s.observed.cohorts.filter(x=>x.observed_payback_month!=null).length;
+  const delta = (a,b,f)=> b==null ? "first month" : (a-b>=0?"▲ ":"▼ ")+f(Math.abs(a-b))+" vs prior month";
+  const tiles = [
+    ["Active members", cm.active_members.toLocaleString("en-US"), delta(cm.active_members, pm&&pm.active_members, v=>v.toLocaleString("en-US"))],
+    ["Net revenue (month)", usdk(cm.net_revenue), delta(cm.net_revenue, pm&&pm.net_revenue, usdk)],
+    ["Contribution (month)", usdk(cm.contribution), delta(cm.contribution, pm&&pm.contribution, usdk)],
+    ["Acquisition spend (month)", usdk(cm.acquisition_spend), "tracked operating campaigns"],
+    ["Newest cohort CAC", usd(c.cac,2), `${mlabel(c.cohort)} · ${c.n_acquired} customers`],
+    ["Cohorts paid back (observed)", `${obsPaid} of ${s.observed.cohorts.length}`, "cash after CAC ≥ 0"],
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map(t=>`<div class="kpi"><div class="label">${t[0]}</div><div class="value">${t[1]}</div><div class="delta">${t[2]}</div></div>`).join("");
+}
+
+// ------------------------------------------------------------------ retention triangle
+function renderTriangle(s){
+  const host=document.getElementById("triangle"); host.innerHTML="";
+  const cw=22, ch=17, L=62, T=18, W=L+24*cw+6, H=T+24*ch+26;
+  const g=svg(W,H); host.appendChild(g);
+  const lo=css("--seq-0"), hi=css("--seq-1");
+  for(let a=0;a<24;a+=3) text(g,L+a*cw+cw/2,T-5,a,{"text-anchor":"middle"});
+  text(g,L+12*cw,H-6,"Age (months since first payment)",{"text-anchor":"middle"});
+  const byC = {}; s.observed.triangle.forEach(r=>(byC[r.cohort]=byC[r.cohort]||[]).push(r));
+  COHORTS.forEach((c,i)=>{ const rows=byC[c]; if(!rows) return; const y=T+i*ch;
+    text(g,L-6,y+ch-4,mshort(c),{"text-anchor":"end"});
+    rows.forEach(r=>{ const t=Math.max(0,Math.min(1,(r.retained_share-.2)/.8)); const fill=mix(lo,hi,t);
+      const x=L+r.age*cw; const rect=el("rect",{x:x+1,y:y+1,width:cw-2,height:ch-2,rx:2,fill},g);
+      const lbl=text(g,x+cw/2,y+ch-5,Math.round(r.retained_share*100),{"text-anchor":"middle","font-size":9});
+      lbl.style.fill = lum(fill)>.35 ? "#0b0b0b" : "#ffffff";
+      [rect,lbl].forEach(n=>hover(n,`<b>${mlabel(c)} cohort, age ${r.age}</b><br>${mlabel(addM(c,r.age))}<br>Retained ${r.n_retained} of ${r.n_acquired} (${pct(r.retained_share)})<br>Net revenue ${usd(r.net_revenue)} · contribution ${usd(r.contribution)}`)); });
+  });
+}
+function addM(m,k){ const d=new Date(m+"T00:00:00Z"); d.setUTCMonth(d.getUTCMonth()+k); return d.toISOString().slice(0,10); }
+
+// ------------------------------------------------------------------ company chart (one $ axis)
+function renderCompany(s){
+  const host=document.getElementById("company"); host.innerHTML="";
+  const series=[["net_revenue","Net revenue","--series-1"],["contribution","Contribution","--series-3"],["acquisition_spend","Acquisition spend","--series-2"]];
+  document.getElementById("companyLegend").innerHTML = series.map(x=>`<span><span class="sw line" style="background:var(${x[2]})"></span>${x[1]}</span>`).join("");
+  const W=600,H=300,L=56,R=86,T=10,B=28; const g=svg(W,H); host.appendChild(g);
+  const all=S[N-1].observed.company; const ymax=Math.ceil(Math.max(...all.map(r=>r.net_revenue))/50000)*50000;
+  const x=i=>L+i*(W-L-R)/(N-1), y=v=>T+(H-T-B)*(1-v/ymax);
+  for(let v=0;v<=ymax;v+=50000){ el("line",{x1:L,x2:W-R,y1:y(v),y2:y(v),class:"gridline"},g); text(g,L-6,y(v)+4,usdk(v),{"text-anchor":"end"}); }
+  [0,6,12,18,23].forEach(i=>text(g,x(i),H-8,mshort(MONTHS[i]),{"text-anchor":"middle"}));
+  const rows=s.observed.company;
+  series.forEach(([k,lab,v])=>{ const pts=rows.map((r,i)=>`${x(i)},${y(r[k])}`).join(" ");
+    el("polyline",{points:pts,fill:"none",stroke:css(v),"stroke-width":2,"stroke-linejoin":"round"},g);
+    const last=rows.at(-1); el("circle",{cx:x(rows.length-1),cy:y(last[k]),r:4,fill:css(v),stroke:css("--surface-1"),"stroke-width":2},g);
+    text(g,x(rows.length-1)+8,y(last[k])+4,usdk(last[k])); });
+  const cross=el("line",{y1:T,y2:H-B,stroke:css("--axis"),"stroke-dasharray":"3 3",visibility:"hidden"},g);
+  const hit=el("rect",{x:L,y:T,width:W-L-R,height:H-T-B,fill:"transparent"},g);
+  hit.addEventListener("mousemove",e=>{ const b=g.getBoundingClientRect(); const px=(e.clientX-b.left)*W/b.width;
+    const i=Math.max(0,Math.min(rows.length-1,Math.round((px-L)/((W-L-R)/(N-1))))); const r=rows[i];
+    cross.setAttribute("x1",x(i)); cross.setAttribute("x2",x(i)); cross.setAttribute("visibility","visible");
+    tip.innerHTML=`<b>${mlabel(r.month)}</b><br>Active members ${r.active_members.toLocaleString()}<br>Net revenue ${usd(r.net_revenue)}<br>Contribution ${usd(r.contribution)}<br>Acquisition spend ${usd(r.acquisition_spend)}<br>Contribution − spend ${usd(r.contribution-r.acquisition_spend)}`;
+    tip.style.display="block"; tip.style.left=(e.clientX+14)+"px"; tip.style.top=(e.clientY+14)+"px"; });
+  hit.addEventListener("mouseleave",()=>{tip.style.display="none";cross.setAttribute("visibility","hidden");});
+}
+
+// ------------------------------------------------------------------ LTV vs CAC bars
+function renderLTV(s){
+  const host=document.getElementById("ltv"); host.innerHTML="";
+  const W=820,H=300,L=52,R=10,T=12,B=40; const g=svg(W,H); host.appendChild(g); hatch(g,"hatchL");
+  const bw=(W-L-R)/24, y=v=>T+(H-T-B)*(1-v/LTVMAX);
+  for(let v=0;v<=LTVMAX;v+=50){ el("line",{x1:L,x2:W-R,y1:y(v),y2:y(v),class:"gridline"},g); text(g,L-6,y(v)+4,usd(v),{"text-anchor":"end"}); }
+  s.observed.cohorts.forEach((c,i)=>{ const x=L+i*bw+bw*.18, w=bw*.64;
+    const o=obsDiscounted(s,c.cohort), fc=fcCohort(s,c.cohort);
+    const total = fc ? fc.ltv_before_cac_mean : null, full = c.observed_months>=12;
+    const obsVal = full && fc ? fc.ltv_before_cac_mean : o;
+    el("rect",{x,y:y(obsVal),width:w,height:Math.max(0,y(0)-y(obsVal)),rx:2,fill:css("--series-1")},g);
+    if(total!=null && total>obsVal+0.005) el("rect",{x,y:y(total),width:w,height:y(obsVal)-y(total)-2,rx:2,fill:"url(#hatchL)",stroke:css("--forecast-ink"),"stroke-width":1},g);
+    el("line",{x1:x-3,x2:x+w+3,y1:y(c.cac),y2:y(c.cac),stroke:css("--text-primary"),"stroke-width":2.5},g);
+    if(i%3===0) text(g,x+w/2,H-B+14,mshort(c.cohort),{"text-anchor":"middle"});
+    const top = total!=null ? total : obsVal;
+    const hit=el("rect",{x:L+i*bw,y:T,width:bw,height:H-T-B,fill:"transparent"},g);
+    hover(hit,`<b>${mlabel(c.cohort)} cohort</b> (${c.n_acquired} customers)<br>Receipts observed: ${Math.min(c.observed_months,12)} of 12<br>Observed value ${usd(obsVal,2)}`+
+      (fc ? `<br>12-receipt LTV ${usd(fc.ltv_before_cac_mean,2)} [${usd(fc.ltv_before_cac_p05,0)}–${usd(fc.ltv_before_cac_p95,0)}]<br>Forecast share ${pct(fc.forecast_share,0)}<br>LTV / CAC ${fc.ltv_to_cac_mean.toFixed(2)}<br>Net LTV after CAC <b>${usd(fc.net_ltv_mean,2)}</b>`
+          : `<br><i>No as-of forecast — remainder unknown</i>`) + `<br>CAC ${usd(c.cac,2)}`);
+  });
+  text(g,L+(W-L-R)/2,H-6,"Acquisition cohort",{"text-anchor":"middle"});
+}
+
+// ------------------------------------------------------------------ payback dots
+function renderPayback(s){
+  const host=document.getElementById("payback"); host.innerHTML="";
+  const W=400,H=300,L=34,R=10,T=12,B=40; const g=svg(W,H); host.appendChild(g);
+  const bw=(W-L-R)/24, y=v=>T+(H-T-B)*(1-(v-1)/12);
+  for(let v=1;v<=13;v+=3){ el("line",{x1:L,x2:W-R,y1:y(v),y2:y(v),class:"gridline"},g); text(g,L-6,y(v)+4,v>12?">12":v,{"text-anchor":"end"}); }
+  s.observed.cohorts.forEach((c,i)=>{ const cx=L+i*bw+bw/2; const fc=fcCohort(s,c.cohort); let node, html;
+    if(c.observed_payback_month!=null){ node=el("circle",{cx,cy:y(c.observed_payback_month),r:5,fill:css("--series-1"),stroke:css("--surface-1"),"stroke-width":2},g);
+      html=`Observed payback at payment <b>${c.observed_payback_month}</b>`; }
+    else if(fc && fc.payback_month!=null){ node=el("circle",{cx,cy:y(fc.payback_month),r:4.5,fill:css("--surface-1"),stroke:css("--forecast-ink"),"stroke-width":2},g);
+      html=`Forecast payback at payment <b>${fc.payback_month}</b> (not yet observed)`; }
+    else { node=el("rect",{x:cx-4,y:y(13)-4,width:8,height:8,fill:css("--surface-2"),stroke:css("--axis"),"stroke-dasharray":"2 2"},g);
+      html = fc ? "Not recovered within 12 payments (forecast)" : "Not yet recovered; no as-of forecast"; }
+    if(i%4===0) text(g,cx,H-B+14,mshort(c.cohort),{"text-anchor":"middle"});
+    const hit=el("rect",{x:L+i*bw,y:T,width:bw,height:H-T-B,fill:"transparent"},g);
+    hover(hit,`<b>${mlabel(c.cohort)} cohort</b><br>${html}<br>CAC ${usd(c.cac,2)} · ${c.observed_months} month(s) observed`); });
+  text(g,L+(W-L-R)/2,H-6,"Acquisition cohort",{"text-anchor":"middle"});
+}
+
+// ------------------------------------------------------------------ cohort explorer
+function renderExplorer(s){
+  const sel=document.getElementById("cohortSel"); const joined=s.observed.cohorts.map(c=>c.cohort);
+  if(!chosenCohort || !joined.includes(chosenCohort)) chosenCohort = joined.at(-1);
+  sel.innerHTML=joined.map(c=>`<option value="${c}" ${c===chosenCohort?"selected":""}>${mlabel(c)}</option>`).join("");
+  const host=document.getElementById("explorer"); host.innerHTML="";
+  const c=s.observed.cohorts.find(x=>x.cohort===chosenCohort), fc=fcCohort(s,chosenCohort);
+  const tri=s.observed.triangle.filter(r=>r.cohort===chosenCohort);
+  const mk=(title,obs,fcv,band,fmt,yr,zero)=>{ const W=320,H=220,L=50,R=8,T=22,B=26; const g=svg(W,H);
+    const wrap=document.createElement("div"); wrap.appendChild(g); host.appendChild(wrap);
+    text(g,L,12,title,{"font-weight":600});
+    const x=a=>L+a*(W-L-R)/11, y=v=>T+(H-T-B)*(1-(v-yr[0])/(yr[1]-yr[0]));
+    for(let k=0;k<=4;k++){ const v=yr[0]+k*(yr[1]-yr[0])/4; el("line",{x1:L,x2:W-R,y1:y(v),y2:y(v),class:"gridline"},g); text(g,L-5,y(v)+4,fmt(v),{"text-anchor":"end"}); }
+    if(zero) { el("line",{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:css("--text-secondary"),"stroke-width":1},g); text(g,W-R,y(0)-4,"CAC recovered",{"text-anchor":"end"}); }
+    [0,3,6,9,11].forEach(a=>text(g,x(a),H-8,a+1,{"text-anchor":"middle"}));
+    if(band){ const pts=band.map(p=>`${x(p[0])},${y(p[2])}`).join(" ")+" "+band.slice().reverse().map(p=>`${x(p[0])},${y(p[1])}`).join(" ");
+      el("polygon",{points:pts,fill:css("--forecast"),opacity:.25},g); }
+    if(fcv.length) el("polyline",{points:fcv.map(p=>`${x(p[0])},${y(p[1])}`).join(" "),fill:"none",stroke:css("--forecast-ink"),"stroke-width":2,"stroke-dasharray":"5 4"},g);
+    el("polyline",{points:obs.map(p=>`${x(p[0])},${y(p[1])}`).join(" "),fill:"none",stroke:css("--series-1"),"stroke-width":2},g);
+    obs.forEach(p=>{ const d=el("circle",{cx:x(p[0]),cy:y(p[1]),r:4,fill:css("--series-1"),stroke:css("--surface-1"),"stroke-width":2},g); hover(d,`Payment ${p[0]+1} (observed): <b>${fmt(p[1])}</b>`); });
+    fcv.forEach(p=>{ const d=el("circle",{cx:x(p[0]),cy:y(p[1]),r:3.5,fill:css("--surface-1"),stroke:css("--forecast-ink"),"stroke-width":2},g); hover(d,`Payment ${p[0]+1} (forecast): <b>${fmt(p[1])}</b>`); });
+    text(g,L+(W-L-R)/2,H+0-0,"",{});
+  };
+  const obsBal=c.balance.slice(0,12).map((v,a)=>[a,v]);
+  const fcBal = fc ? fc.curve.filter(p=>!p.observed).map(p=>[p.age,p.balance_per_customer]) : [];
+  if(fcBal.length && obsBal.length) fcBal.unshift(obsBal.at(-1));
+  const vals=obsBal.concat(fcBal).map(p=>p[1]).concat([0]);
+  const lo=Math.floor(Math.min(...vals)/50)*50; let hi=Math.ceil(Math.max(...vals)/50)*50;
+  const step=Math.ceil((hi-lo)/4/25)*25; hi=lo+4*Math.max(step,25);
+  mk("Cash after CAC per customer",obsBal,fcBal,null,v=>usd(v),[lo,hi],true);
+  const obsRet=tri.filter(r=>r.age<12).map(r=>[r.age,r.retained_share]);
+  const fcRet = fc ? fc.curve.filter(p=>!p.observed).map(p=>[p.age,p.retained_share]) : [];
+  const band = fc ? fc.curve.filter(p=>!p.observed).map(p=>[p.age,p.retained_share_p05,p.retained_share_p95]) : null;
+  if(fcRet.length && obsRet.length){ fcRet.unshift(obsRet.at(-1)); band && band.unshift([obsRet.at(-1)[0],obsRet.at(-1)[1],obsRet.at(-1)[1]]); }
+  mk("Retention (% of original)",obsRet,fcRet,band&&band.length?band:null,v=>Math.round(v*100)+"%",[0,1],false);
+  const note=document.createElement("div"); note.className="note"; note.style.gridColumn="1 / -1";
+  note.textContent = fc ? (c.observed_months>=12 ? "All 12 receipts observed." : `${c.observed_months} receipt(s) observed; payments ${c.observed_months+1}–12 forecast from the as-of refit.`)
+                        : "No as-of forecast for this month: only observed values are shown.";
+  host.appendChild(note);
+}
+document.getElementById("cohortSel").addEventListener("change",e=>{chosenCohort=e.target.value; renderExplorer(S[idx]);});
+
+// ------------------------------------------------------------------ cohort mix (100% stacked)
+function renderMix(s){
+  document.getElementById("mixLegend").innerHTML=SEGMENTS.map((sg,k)=>`<span><span class="sw" style="background:var(${SEGVAR[k]})"></span>${sg[2]}</span>`).join("");
+  const host=document.getElementById("mix"); host.innerHTML="";
+  const W=600,H=250,L=40,R=8,T=8,B=30; const g=svg(W,H); host.appendChild(g);
+  const bw=(W-L-R)/24, y=v=>T+(H-T-B)*(1-v);
+  [0,.25,.5,.75,1].forEach(v=>{ el("line",{x1:L,x2:W-R,y1:y(v),y2:y(v),class:"gridline"},g); text(g,L-5,y(v)+4,Math.round(v*100)+"%",{"text-anchor":"end"}); });
+  const byC={}; s.observed.mix.forEach(r=>(byC[r.cohort]=byC[r.cohort]||[]).push(r));
+  COHORTS.forEach((c,i)=>{ const rows=byC[c]; if(!rows) return; const n=rows.reduce((a,r)=>a+r.n_acquired,0); let acc=0;
+    const x=L+i*bw+bw*.15, w=bw*.7;
+    SEGMENTS.forEach((sg,k)=>{ const r=rows.find(q=>q.channel===sg[0]&&q.primary_need===sg[1]); const v=r? r.n_acquired/n:0; if(!v) return;
+      const rect=el("rect",{x,y:y(acc+v)+1,width:w,height:Math.max(0,y(acc)-y(acc+v)-2),fill:css(SEGVAR[k])},g);
+      hover(rect,`<b>${mlabel(c)} cohort</b><br>${sg[2]}: ${r.n_acquired} of ${n} (${pct(v)})`); acc+=v; });
+    if(i%3===0) text(g,x+w/2,H-12,mshort(c),{"text-anchor":"middle"}); });
+}
+
+// ------------------------------------------------------------------ decision + matched-age
+function badge(kind,label){ const col={good:"--good",warn:"--warning",bad:"--critical",none:"--axis"}[kind];
+  const icon={good:"✓",warn:"~",bad:"✕",none:"–"}[kind]; return `<span class="badge"><span class="dot" style="background:var(${col})"></span>${icon} ${label}</span>`; }
+function renderDecision(s){
+  const d=s.decision, host=document.getElementById("decision");
+  if(!d.available){ const tests=s.observed.tests.length;
+    host.innerHTML=`<div class="empty">${d.reason}${tests?"":" Monthly holdouts started in July 2025; the first 31-day window closed on August 1, 2025."}</div>`; return; }
+  const rows=d.rows.slice().sort((a,b)=>b.value_less_icac-a.value_less_icac);
+  host.innerHTML=`<div class="scroll"><table><thead><tr><th>Cell</th><th>Test</th><th>iCAC [95%]</th><th>Value (${mshort(d.benchmark_cohort)} cohort)</th><th>Value − iCAC</th><th></th></tr></thead><tbody>`+
+    rows.map(r=>{ const robust=r.icac_ci_upper!=null && r.value_before_cac>r.icac_ci_upper;
+      const b = r.value_less_icac>0 ? (robust?badge("good","robust"):badge("warn","uncertain")) : badge("bad","loses");
+      return `<tr><td>${segName(r.channel,r.primary_need)}</td><td>${mshort(r.test_month)}</td><td>${usd(r.icac,0)} [${usd(r.icac_ci_lower,0)}–${r.icac_ci_upper==null?"∞":usd(r.icac_ci_upper,0)}]</td><td>${usd(r.value_before_cac,0)} <span style="color:var(--text-muted)">(${pct(r.forecast_share,0)} fcst)</span></td><td><b>${usd(r.value_less_icac,0)}</b></td><td>${b}</td></tr>`; }).join("")+
+    `</tbody></table></div><div class="note">Robust = value exceeds even the upper 95% iCAC bound; uncertain = positive at the point estimate only; loses = value below iCAC.<br>Search · build skill priority rule: ${d.supported_robust?badge("good","supported (robust)"):d.supported_point?badge("warn","supported on point estimates"):badge("bad","not supported")}</div>`;
+}
+function renderMatched(s){
+  const m=s.observed.matched_age, host=document.getElementById("matched");
+  if(!m.available){ host.innerHTML=`<div class="empty">${m.reason}</div>`; return; }
+  const b=m.baseline, l=m.latest;
+  host.innerHTML=`<table><thead><tr><th></th><th>Jan–Mar 2024</th><th>${mshort(l.cohorts[0])} – ${mshort(l.cohorts[2])}</th><th>Change</th></tr></thead><tbody>
+    <tr><td>Customers</td><td>${b.n_acquired}</td><td>${l.n_acquired}</td><td></td></tr>
+    <tr><td>Retained at age 5</td><td>${pct(b.retained_share)}</td><td>${pct(l.retained_share)}</td><td>${((l.retained_share-b.retained_share)*100).toFixed(1)} pts</td></tr>
+    <tr><td>Historical average CAC</td><td>${usd(b.cac,2)}</td><td>${usd(l.cac,2)}</td><td>${usd(l.cac-b.cac,2)}</td></tr>
+    <tr><td>Cash after CAC per customer</td><td>${usd(b.cash_after_cac_per_customer,2)}</td><td>${usd(l.cash_after_cac_per_customer,2)}</td><td>${usd(l.cash_after_cac_per_customer-b.cash_after_cac_per_customer,2)}</td></tr>
+    </tbody></table><div class="note">Rule: ${m.supported?badge("good","newer cohorts better at the same age"):badge("bad","not yet better")}</div>`;
+}
+
+// ------------------------------------------------------------------ evidence timeline + answer
+function renderTimeline(){
+  const host=document.getElementById("timeline");
+  const rules=[["Same-age cohorts improving (observed)",s=>s.observed.matched_age.supported],
+               ["Search · build skill priority (point)",s=>s.decision.supported_point],
+               ["Search · build skill priority (robust)",s=>s.decision.supported_robust]];
+  let h=`<div></div>`+MONTHS.map((m,i)=>`<div style="text-align:center;color:var(--text-muted);font-size:10px">${i%3===0?mshort(m):""}</div>`).join("");
+  rules.forEach(([lab,f])=>{ h+=`<div class="lab">${lab}</div>`+S.map((s,i)=>`<div class="cell ${f(s)?"yes":""} ${i===idx?"cur":""}" title="${mlabel(s.as_of)}: ${f(s)?"held":"not held"}"></div>`).join(""); });
+  host.innerHTML=h;
+  const fs=DATA.first_support, fm=x=>x.first_month?mlabel(x.first_month):"never";
+  const r=DATA.meta.evidence_rules;
+  document.getElementById("answer").innerHTML=
+    `<b>Improving cohorts:</b> first held as of <b>${fm(fs.matched_age_improvement)}</b>${fs.matched_age_improvement.held_every_month_after?" and held every month after":" (not every month after)"}. <span class="note">${r.matched_age_improvement}</span><br>`+
+    `<b>Acquisition recommendation (prioritise Search · build skill):</b> first supported on point estimates as of <b>${fm(fs.acquisition_priority_point)}</b>; robustly (value above the upper iCAC bound) as of <b>${fm(fs.acquisition_priority_robust)}</b>. <span class="note">${r.acquisition_priority_robust}</span>`;
+}
+function renderRecon(){
+  const r=DATA.reconciliation, host=document.getElementById("recon");
+  if(!r.checks){ host.innerHTML=`<div class="empty">Reconciliation not available (${r.status}).</div>`; return; }
+  const lab={exact:badge("good","exact match"),within_one_cent:badge("good","matches within $0.01"),differs:badge("warn","differs — see notes")}[r.status];
+  host.innerHTML=`<p class="desc">The December 2025 view refits the report's model on the full panel (same data, code, seed and NUTS budget) and is compared with the baseline report's saved tables. ${lab}</p>
+  <table><thead><tr><th>Baseline table</th><th>Measure</th><th>Rows</th><th>Max |difference|</th></tr></thead><tbody>`+
+  r.checks.map(c=>`<tr><td>${c.table}</td><td>${c.measure}</td><td>${c.rows}</td><td>${c.max_abs_difference.toExponential(2)}</td></tr>`).join("")+
+  `</tbody></table><div class="note">Baseline PDF SHA-256: ${r.baseline_pdf_sha256||"—"}</div>`;
+}
+
+// ------------------------------------------------------------------ main
+function render(){
+  const s=S[idx];
+  document.getElementById("asof").innerHTML=`${mlabel(s.as_of)}<small>as-of month end · ${idx+1} of ${N}</small>`;
+  document.getElementById("slider").value=idx;
+  renderStatus(s); renderKPIs(s); renderTriangle(s); renderCompany(s); renderLTV(s); renderPayback(s);
+  renderExplorer(s); renderMix(s); renderDecision(s); renderMatched(s); renderTimeline();
+}
+const go=k=>{ idx=Math.max(0,Math.min(N-1,k)); render(); };
+document.getElementById("prev").onclick=()=>go(idx-1);
+document.getElementById("next").onclick=()=>go(idx+1);
+document.getElementById("slider").oninput=e=>go(+e.target.value);
+document.getElementById("play").onclick=e=>{ if(timer){clearInterval(timer);timer=null;e.target.textContent="▶ Play";return;}
+  if(idx===N-1) go(0); e.target.textContent="❚❚ Pause"; timer=setInterval(()=>{ if(idx>=N-1){clearInterval(timer);timer=null;document.getElementById("play").textContent="▶ Play";return;} go(idx+1); },1400); };
+document.addEventListener("keydown",e=>{ if(e.target.tagName==="SELECT") return; if(e.key==="ArrowLeft") go(idx-1); if(e.key==="ArrowRight") go(idx+1); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+const m=DATA.meta;
+document.getElementById("footer").innerHTML=`Source: ${m.lab_repository} @ ${m.lab_commit.slice(0,12)} (data, SQL and model byte-identical to the baseline report's release ${m.baseline_report_commit.slice(0,12)}) · data as of ${m.data_as_of} (exclusive), ${m.timezone}, ${m.currency}. `+
+  `Definitions follow the baseline report: cohort = first successful paid month; age 0 = acquisition month; original-customer denominators; contribution = net revenue − variable costs; `+
+  `LTV = ${m.horizon_receipts} monthly receipts discounted at ${m.monthly_discount*100}%/month (receipt at t = age + 1); CAC = historical average (tracked spend ÷ acquired customers); `+
+  `payback = first payment where undiscounted cumulative contribution ≥ CAC. Forecasts: hierarchical sBG + Gamma, NumPyro NUTS, seed ${m.seed}, refit for every as-of month on records dated through that month; bands show parameter uncertainty only. Fictional business; synthetic data.`;
+renderRecon(); render();
+</script>
+</body>
+</html>

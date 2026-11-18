@@ -1,0 +1,22 @@
+[project]
+name = "studio-north-dashboard"
+version = "1.0.0"
+description = "Month-by-month replay of the Studio North customer-economics report (FAQ 4)."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+# Pinned to the exact versions used by the Studio North lab environment that
+# produced the baseline report, so as-of refits use the same numerical stack.
+dependencies = [
+  "duckdb==2.0.0",
+  "numpy==2.5.4",
+  "pandas==2.3.3",
+  "scipy==1.18.1",
+  "jax[cpu]==0.12.0.1",
+  "jaxlib==0.12.0.1",
+  "numpyro==0.22.0",
+  "matplotlib==3.11.2",
+  "jinja2==3.1.6",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+.lab/
+work/
+*.pyc
+work-build.log

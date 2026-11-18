@@ -1,0 +1,131 @@
+{
+ "meta": {
+  "lab_repository": "https://github.com/longxiutian/customer-economics-lab",
+  "lab_commit": "4848f4b75628bde8a43858bb54ca7c09de603f61",
+  "baseline_report_commit": "0e40ce3cd0b788a3914ca4eb9f90d58ae1b62903",
+  "data_as_of": "2026-01-01T00:00:00Z",
+  "currency": "USD",
+  "timezone": "UTC",
+  "seed": 20261116,
+  "nuts_steps": 3000,
+  "horizon_receipts": 12,
+  "monthly_discount": 0.01,
+  "source_hashes": {
+   "acquisition_attribution.csv": "301da5f5b0b24e99a3dc5885fb1bd608b5b7a616126b33e4b4e223a168833758",
+   "campaign_spend.csv": "a6110f1403dbe518ce5243c1392fd99fbfa101c66525f3371997055f304c0e8d",
+   "channel_holdouts.csv": "1233899b79e24005af9e1863bcb1b220b762534d536cdff432e5c184a164764b",
+   "feedback.csv": "505c0c76028273363eefc13f70ca396b94b7601c910be65e7e2cb00693752568",
+   "people.csv": "d65009952863c9e7a434d1ac51629bd7181c5ea8f776c0b9ec9b53d85e3d9826",
+   "product_events.csv": "007185d413810f602b14b0addf046c6603610482609ea9f858d989e1c76dc63a",
+   "subscription_periods.csv": "f99a5d171330038a9b3291b5995b0e22cf5f7e4cb9fa94473482ae3c72b3cc7f",
+   "transactions.csv": "302397ee13f7e6c806a59ab33a4567d372f6fbd86d07a22ccf1ffeda40bfc2fb"
+  },
+  "evidence_rules": {
+   "matched_age_improvement": "Observed: the latest three cohorts with six receipts beat Jan-Mar 2024 at age 5 on retention and on cash after CAC, and their cash after CAC is >= 0.",
+   "acquisition_priority_point": "Search / build skill has the largest positive value less iCAC and both save-time cells are negative (point estimates).",
+   "acquisition_priority_robust": "As above, and Search / build skill value exceeds the upper 95% bound of its iCAC."
+  }
+ },
+ "first_support": {
+  "matched_age_improvement": {
+   "first_month": "2024-11-01",
+   "held_every_month_after": true
+  },
+  "acquisition_priority_point": {
+   "first_month": "2025-10-01",
+   "held_every_month_after": false
+  },
+  "acquisition_priority_robust": {
+   "first_month": "2025-12-01",
+   "held_every_month_after": true
+  }
+ },
+ "reconciliation": {
+  "baseline_dir": "baseline",
+  "baseline_pdf_sha256": "f59df2068768bb27b9b407fd785dafe02b23c35c4f2767253938a9836f853ce9",
+  "checks": [
+   {
+    "table": "cohort_valuation",
+    "measure": "cac",
+    "rows": 24,
+    "max_abs_difference": 4.7691628424217924e-11
+   },
+   {
+    "table": "cohort_valuation",
+    "measure": "ltv_before_cac_mean",
+    "rows": 24,
+    "max_abs_difference": 4.9965365178650245e-11
+   },
+   {
+    "table": "cohort_valuation",
+    "measure": "net_ltv_mean",
+    "rows": 24,
+    "max_abs_difference": 4.8274273467541207e-11
+   },
+   {
+    "table": "cohort_valuation",
+    "measure": "forecast_share",
+    "rows": 24,
+    "max_abs_difference": 4.515249285574896e-11
+   },
+   {
+    "table": "cohort_valuation",
+    "measure": "payback_month",
+    "rows": 24,
+    "max_abs_difference": 0.0
+   },
+   {
+    "table": "channel_value_decision",
+    "measure": "value_before_cac",
+    "rows": 4,
+    "max_abs_difference": 4.7407411329913884e-11
+   },
+   {
+    "table": "channel_value_decision",
+    "measure": "icac",
+    "rows": 4,
+    "max_abs_difference": 4.931166586175095e-11
+   },
+   {
+    "table": "channel_value_decision",
+    "measure": "value_less_icac",
+    "rows": 4,
+    "max_abs_difference": 9.674749890109524e-11
+   },
+   {
+    "table": "cohort_cash_economics",
+    "measure": "latest_balance_per_customer",
+    "rows": 24,
+    "max_abs_difference": 0.0
+   }
+  ],
+  "max_abs_difference": 9.674749890109524e-11,
+  "status": "exact"
+ },
+ "forecast_status": {
+  "2024-01": "blank",
+  "2024-02": "blank",
+  "2024-03": "fitted",
+  "2024-04": "fitted",
+  "2024-05": "fitted",
+  "2024-06": "fitted",
+  "2024-07": "fitted",
+  "2024-08": "fitted",
+  "2024-09": "fitted",
+  "2024-10": "fitted",
+  "2024-11": "fitted",
+  "2024-12": "fitted",
+  "2025-01": "fitted",
+  "2025-02": "fitted",
+  "2025-03": "fitted",
+  "2025-04": "fitted",
+  "2025-05": "fitted",
+  "2025-06": "fitted",
+  "2025-07": "fitted",
+  "2025-08": "fitted",
+  "2025-09": "fitted",
+  "2025-10": "fitted",
+  "2025-11": "fitted",
+  "2025-12": "fitted"
+ }
+}

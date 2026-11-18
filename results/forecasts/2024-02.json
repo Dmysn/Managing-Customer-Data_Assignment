@@ -1,0 +1,14 @@
+{
+ "as_of": "2024-02-01",
+ "seed": 20261116,
+ "steps": 3000,
+ "training_rows": 12,
+ "training_last_calendar_month": "2024-02-01",
+ "cohorts_in_training": [
+  "2024-01-01",
+  "2024-02-01"
+ ],
+ "status": "blank",
+ "reason": "History too short to fit the report's model: Insufficient mature cohort cells for the two-part model",
+ "fit_seconds": 0.1
+}
